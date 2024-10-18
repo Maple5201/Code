@@ -1,0 +1,80 @@
+
+.modal-min {
+    width: 15rem;
+}
+
+
+.modal-max {
+    width: 40rem;
+}
+
+/*modal box*/
+.modal-box {
+    display: block;
+    /*Apex positioning relative to the current browser*/
+    position: fixed;
+    width: 30rem;
+    height: 50rem;
+
+    background-color: white;
+    top: 50%;
+    left: 50%;
+    margin-top: 0;
+    margin-left: 0;
+    transform: translate(-50%, -50%);
+    border-radius: 7px;
+
+    overflow: hidden;
+
+    z-index: 111;
+
+}
+
+/*Top of the modal box*/
+.modal-box-top {
+
+    position: relative;
+
+    width: 100%;
+    height: 3rem;
+
+    border-bottom: 1px solid #000000;
+    padding: 0.5rem;
+
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+
+/*Modal frame body*/
+.modal-box-content {
+    width: 100%;
+    height: 100%;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.modal-box-content img{
+    height: 50%;
+    width:auto;
+    
+}
+
+/*Bottom of the modal box*/
+.modal-box-bottom {
+    width: 100%;
+    height: 4rem;
+    border-top: 1px solid #cccccc;
+    padding: 0.5rem;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+#close-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-top: 1rem;
+    margin-right: 1rem;
+  }
