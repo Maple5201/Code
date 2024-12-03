@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enrollment System</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.6.1/dist/web3.min.js"></script>
+</head>
+<body>
+    <h1>Enrollment System</h1>
+    <div>
+        <label>Module Name: <input id="moduleName" type="text"></label><br>
+        <label>Capacity: <input id="moduleCapacity" type="number"></label><br>
+        <button onclick="addModule()">Add Module</button>
+        <p id="addModuleStatus"></p>
+    </div>
+    <hr>
+    <div>
+        <label>Enroll Module: <input id="enrollModuleName" type="text"></label><br>
+        <button onclick="enrollStudent()">Enroll</button>
+        <p id="enrollStatus"></p>
+    </div>
+    <hr>
+    <div>
+        <label>Check Module: <input id="checkModuleName" type="text"></label><br>
+        <button onclick="getModuleDetails()">Check Details</button>
+        <p id="moduleDetails"></p>
+    </div>
+    <hr>
+    <div>
+        <h3>Module List</h3>
+        <ul id="moduleList"></ul>
+    </div>
+
+    <script>
+        const contractAddress = "0xC0475910D99c74aB40FA915d00371953F8C29F8E"; 
+        const contractABI = [
+        {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "moduleStudents",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "name": "modules",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "moduleName",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "capacity",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "enrolled",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "moduleName",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "capacity",
+          "type": "uint256"
+        }
+      ],
+      "name": "addModule",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "moduleName",
+          "type": "string"
+        }
+      ],
+      "name": "enrollStudent",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "moduleName",
+          "type": "string"
+        }
+      ],
+      "name": "getModuleDetails",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [],
+      "name": "getAllModules",
+      "outputs": [
+        {
+          "internalType": "string[]",
+          "name": "",
+          "type": "string[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    }
+        ];
+
+        const web3 = new Web3(Web3.givenProvider || "http://127.0.0.1:7545");
+        const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+        async function addModule() {
+            const accounts = await web3.eth.getAccounts();
+            const moduleName = document.getElementById("moduleName").value;
+            const moduleCapacity = document.getElementById("moduleCapacity").value;
+            const status = document.getElementById("addModuleStatus");
+
+            try {
+                await contract.methods.addModule(moduleName, moduleCapacity).send({ from: accounts[0] });
+                status.innerText = "Module added successfully!";
+                status.style.color = "green";
+                updateModuleList();
+            } catch (error) {
+                status.innerText = "Error adding module: " + error.message;
+                status.style.color = "red";
+            }
+        }
+
+        async function enrollStudent() {
+            const accounts = await web3.eth.getAccounts();
+            const moduleName = document.getElementById("enrollModuleName").value;
+            const status = document.getElementById("enrollStatus");
+
+            try {
+                await contract.methods.enrollStudent(moduleName).send({ from: accounts[0] });
+                status.innerText = "Enrollment successful!";
+                status.style.color = "green";
+                updateModuleList();
+            } catch (error) {
+                status.innerText = "Error enrolling student: " + error.message;
+                status.style.color = "red";
+            }
+        }
+
+        async function getModuleDetails() {
+            const moduleName = document.getElementById("checkModuleName").value;
+            const detailsElement = document.getElementById("moduleDetails");
+
+            try {
+                const details = await contract.methods.getModuleDetails(moduleName).call();
+                detailsElement.innerText = `Module Name: ${details[0]}, Capacity: ${details[1]}, Enrolled: ${details[2]}`;
+            } catch (error) {
+                detailsElement.innerText = "Error fetching details: " + error.message;
+            }
+        }
+
+        async function updateModuleList() {
+    const listElement = document.getElementById("moduleList");
+    listElement.innerHTML = ""; 
+
+    try {
+        const moduleNames = await contract.methods.getAllModules().call(); 
+        for (const moduleName of moduleNames) {
+            const details = await contract.methods.getModuleDetails(moduleName).call(); 
+            const listItem = document.createElement("li");
+            listItem.innerText = `Module Name: ${details[0]}, Capacity: ${details[1]}, Enrolled: ${details[2]}`;
+            listElement.appendChild(listItem);
+        }
+    } catch (error) {
+        console.error("Error fetching module list:", error.message);
+    }
+}
+
+
+
+        window.addEventListener('load', async () => {
+            if (window.ethereum) {
+                try {
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    console.log("MetaMask connected!");
+                    updateModuleList();
+                } catch (error) {
+                    console.error("MetaMask connection rejected:", error.message);
+                }
+            } else {
+                alert("MetaMask is not installed. Please install it to use this application.");
+            }
+        });
+    </script>
+</body>
+</html>
